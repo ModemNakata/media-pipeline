@@ -80,7 +80,7 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
         if content_type == "video":
             upload.upload_video(cfg, output_dir, content_id)
             s3_prefix = f"videos/{content_id}"
-            thumbnail_url = f"{s3_prefix}/thumbnail.jpg"
+            thumbnail_url = f"{s3_prefix}/thumbnail.avif"
             preview_path = f"{s3_prefix}/preview.webm"
             processed_files = [f"{s3_prefix}/master.m3u8"]
             if is_paywalled and free_preview_output_dir:

@@ -62,7 +62,7 @@ def _target_16x9(src_w: int, src_h: int, max_short: int) -> tuple[int, int]:
 def _generate_thumbnail(input_path: Path, output_dir: Path,
                          src_w: int, src_h: int) -> Optional[Path]:
     tw, th = _target_16x9(src_w, src_h, 720)
-    out = output_dir / "thumbnail.jpg"
+    out = output_dir / "thumbnail.avif"
     log.info("processor", f"thumbnail target: {tw}x{th}")
     cmd = [
         "ffmpeg", "-y", "-i", str(input_path),
@@ -70,6 +70,7 @@ def _generate_thumbnail(input_path: Path, output_dir: Path,
         "-vframes", "1",
         "-vf", f"scale={tw}:{th}:force_original_aspect_ratio=increase,"
                f"crop={tw}:{th}",
+        "-c:v", "libsvtav1", "-crf", "30", "-pix_fmt", "yuv420p10le",
         str(out),
     ]
     proc = log.run_cmd(cmd, module="processor")
