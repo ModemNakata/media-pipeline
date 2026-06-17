@@ -84,7 +84,7 @@ main.py
 
 ### Content Types & Paywalled Content
 
-- **`video`**: Expects exactly 1 source file. Generates HLS output, thumbnail (AVIF, 16:9 crop at 5s), preview (WebM/VP9). For paywalled videos, also generates a separate HLS free-preview subdirectory (trimmed to `free_preview_duration_s`).
+- **`video`**: Expects exactly 1 source file. Generates HLS output, thumbnail (AVIF, 16:9 crop at 5s), preview (WebM/AV1). For paywalled videos, also generates a separate HLS free-preview subdirectory (trimmed to `free_preview_duration_s`).
 - **`image_set`**: Generates AVIF from each file in the download directory. First-image preview (720px square crop). For paywalled image sets, generates blurred AVIF variants (`blurred_{i}.avif`) via ffmpeg `gblur` filter for images beyond `unblurred_count`.
 - S3 paths: `videos/{content_id}/` and `galleries/{content_id}/` respectively.
 

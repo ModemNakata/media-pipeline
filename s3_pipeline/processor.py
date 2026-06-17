@@ -91,7 +91,7 @@ def _generate_preview(input_path: Path, output_dir: Path,
         "ffmpeg", "-y", "-ss", "0", "-i", str(input_path),
         "-t", str(duration), "-an",
         "-vf", f"scale={tw}:{th}:force_original_aspect_ratio=increase,crop={tw}:{th}",
-        "-c:v", "libvpx-vp9", "-b:v", "500k",
+        "-c:v", "libsvtav1", "-crf", "35", "-pix_fmt", "yuv420p10le",
         str(out),
     ]
     proc = log.run_cmd(cmd, module="processor")
