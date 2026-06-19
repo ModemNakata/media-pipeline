@@ -61,15 +61,16 @@ class VideoConfig:
     preset: str = "4"
     pixel_format: str = "yuv420p10le"
     hls: HlsConfig = field(default_factory=HlsConfig)
+    # can actually set crf to 20-24
     profiles: List[Profile] = field(default_factory=lambda: [
         # 1440p (2K)  — 2560x1440  — crf=28  maxrate=5625k  bufsize=11250k  — premium high-density desktop quality
-        Profile("1440p", 5000000, 2560, 1440, 5625, 11250, crf=28),
+        Profile("1440p", 5000000, 2560, 1440, 5625, 11250, crf=18),
         # 1080p (FHD)  — 1920x1080  — crf=28  maxrate=3125k  bufsize=6250k   — improved quality sweet spot
-        Profile("1080p", 3500000, 1920, 1080, 3125, 6250, crf=28),
+        Profile("1080p", 3500000, 1920, 1080, 3125, 6250, crf=20),
         # 720p  (HD)   — 1280x720   — crf=30  maxrate=1875k  bufsize=3750k   — mobile/cellular fallback
-        Profile("720p",  2000000, 1280, 720,  1875, 3750, crf=30),
+        Profile("720p",  2000000, 1280, 720,  1875, 3750, crf=26),
         # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
-        Profile("480p",  1000000, 854,  480,  1000, 2000, crf=32),
+        Profile("480p",  1000000, 854,  480,  1000, 2000, crf=30),
     ])
     watermark: WatermarkConfig = field(default_factory=WatermarkConfig)
     rate_control_maxrate: Optional[int] = None
