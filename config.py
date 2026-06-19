@@ -57,8 +57,8 @@ class VideoConfig:
     input_video: str = ""
     output_dir: str = ""
     video_codec: str = "libsvtav1"
-    codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=8:film-grain-denoise=1"
-    preset: str = "5"
+    codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=0:film-grain-denoise=0"
+    preset: str = "4"
     pixel_format: str = "yuv420p10le"
     hls: HlsConfig = field(default_factory=HlsConfig)
     profiles: List[Profile] = field(default_factory=lambda: [
@@ -114,8 +114,8 @@ class AppConfig:
 
     # Video defaults
     video_codec: str = "libsvtav1"
-    video_codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=8:film-grain-denoise=1"
-    video_preset: str = "5"
+    video_codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=0:film-grain-denoise=0"
+    video_preset: str = "4"
     video_pix_fmt: str = "yuv420p10le"
 
     hls_segment_duration: int = 4
@@ -202,7 +202,7 @@ class AppConfig:
             )),
             video_codec=env.get("VIDEO_CODEC", "libsvtav1"),
             video_codec_params=env.get("VIDEO_CODEC_PARAMS") or None,
-            video_preset=env.get("VIDEO_PRESET", "5"),
+            video_preset=env.get("VIDEO_PRESET", "4"),
             video_pix_fmt=env.get("VIDEO_PIX_FMT", "yuv420p10le"),
             rate_control_maxrate=int(env["RATE_CONTROL_MAXRATE"]) if "RATE_CONTROL_MAXRATE" in env else None,
             rate_control_bufsize=int(env["RATE_CONTROL_BUFSIZE"]) if "RATE_CONTROL_BUFSIZE" in env else None,
@@ -353,8 +353,8 @@ def build_scale(profile: Profile, src_w: int, src_h: int) -> Tuple[Optional[str]
     if src_w >= src_h:
         w = profile.ref_width
         h = int(w * src_h / src_w / 2) * 2
-        return f"scale={w}:-2", f"{w}x{h}"
+        return f"scale={w}:-2:flags=lanczos", f"{w}x{h}"
     else:
         h = profile.ref_width
         w = int(h * src_w / src_h / 2) * 2
-        return f"scale=-2:{h}", f"{w}x{h}"
+        return f"scale=-2:{h}:flags=lanczos", f"{w}x{h}"
