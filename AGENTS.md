@@ -1,4 +1,4 @@
-# HLS-webp-pipeline-S3 — Agent Guide
+# ffmpeg s3 pipeline — Agent Guide
 
 ## Project Overview
 
