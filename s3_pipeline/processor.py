@@ -144,7 +144,8 @@ def _source_quality(min_dim: int, fps: float) -> str:
 
 
 def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Path,
-                  free_preview_duration: int = 0) -> tuple[Path, float, Optional[Path], str]:
+                  free_preview_duration: int = 0
+                  ) -> tuple[Path, float, Optional[Path], str, str, dict[str, str]]:
     output_dir = workdir / content_id / "av1_output"
     print(f"[processor] ── AV1 pipeline for {content_id} ──")
     print(f"[processor] input:  {input_path}")
@@ -200,11 +201,14 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
     for p in profiles:
         actual[p.name] = transcode.run(vcfg, p, meta)
 
-    manifest.generate(str(output_dir), profiles, actual)
+    # ── Build video_formats (replaces master.m3u8) ─────────────────
+    video_formats = manifest.generate(str(output_dir), profiles, actual, content_id)
 
     _generate_thumbnail(input_path, output_dir, meta.width, meta.height)
     _generate_preview(input_path, output_dir, meta.width, meta.height,
                        cfg.preview_duration)
+
+    source_resolution = f"{meta.width}x{meta.height}"
 
     free_preview_output_dir: Optional[Path] = None
     if free_preview_duration > 0:
@@ -212,9 +216,10 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
         trimmed = workdir / content_id / "free_preview_trimmed.mp4"
         if _trim_video(input_path, trimmed, free_preview_duration):
             free_preview_output_dir = workdir / content_id / "av1_free_preview"
+            free_preview_output_dir.mkdir(parents=True, exist_ok=True)
+            # Encode a single low-res .webm for the free preview
             fp_vcfg = cfg.build_video_config(str(trimmed), str(free_preview_output_dir))
             fp_meta = probe.probe(fp_vcfg)
-            free_preview_output_dir.mkdir(parents=True, exist_ok=True)
             fp_profiles = filter_profiles(fp_vcfg.profiles, fp_meta.min_dim)
             if not fp_profiles:
                 fp_src = Profile(
@@ -242,15 +247,16 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
                     )
                     fp_profiles.insert(0, fp_src)
             print(f"[processor] free preview active profiles: {[p.name for p in fp_profiles]}")
-            fp_actual: dict[str, str] = {}
-            for p in fp_profiles:
-                fp_actual[p.name] = transcode.run(fp_vcfg, p, fp_meta)
-            manifest.generate(str(free_preview_output_dir), fp_profiles, fp_actual)
+            # Transcode only the lowest profile for free preview
+            lowest_fp = fp_profiles[-1]
+            transcode.run(fp_vcfg, lowest_fp, fp_meta)
+            print(f"[processor] free preview .webm written")
 
     sq = _source_quality(meta.min_dim, meta.fps)
     print(f"[processor] source quality: {sq}")
+    print(f"[processor] source resolution: {source_resolution}")
     print(f"[processor] AV1 pipeline complete for {content_id}")
-    return output_dir, meta.duration_s, free_preview_output_dir, sq
+    return output_dir, meta.duration_s, free_preview_output_dir, sq, source_resolution, video_formats
 
 
 def _generate_image_preview(input_path: Path, output_dir: Path) -> Optional[Path]:

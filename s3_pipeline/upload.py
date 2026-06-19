@@ -16,9 +16,23 @@ def upload_dir(cfg: AppConfig, local_dir: Path, s3_dest: str) -> None:
     if proc.returncode != 0:
         log.info("upload", f"ERROR:\n{proc.stderr}")
         raise RuntimeError(f"mc upload failed for {local_dir}")
-
     total = sum(f.stat().st_size for f in local_dir.rglob("*") if f.is_file())
     print(f"[upload] done ({total / (1024*1024):.1f} MB uploaded)")
+
+
+def upload_file(cfg: AppConfig, local_path: Path, s3_key: str) -> None:
+    """Upload a single file to S3_BUCKET at the given key."""
+    dest = f"{cfg.mc_alias}/{cfg.s3_bucket}/{s3_key}"
+    log.info("upload", f"mc cp {local_path.name} -> {s3_key}")
+    proc = log.run_cmd(
+        ["mc", "cp", str(local_path), dest],
+        module="upload",
+    )
+    if proc.returncode != 0:
+        log.info("upload", f"ERROR:\n{proc.stderr}")
+        raise RuntimeError(f"mc upload failed for {local_path}")
+    size_mb = local_path.stat().st_size / (1024 * 1024)
+    print(f"[upload] done ({size_mb:.1f} MB uploaded)")
 
 
 def upload_video(cfg: AppConfig, output_dir: Path, content_id: str) -> None:

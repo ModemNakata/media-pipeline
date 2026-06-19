@@ -99,14 +99,28 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
 
     cmd += ["-c:a", "libopus", "-b:a", "96k"] # 128 160 320 (192–256) - 192k
 
-    cmd += ["-hls_time", str(cfg.hls.segment_duration)]
-    cmd += ["-hls_playlist_type", cfg.hls.playlist_type]
-    cmd += ["-hls_segment_type", cfg.hls.segment_type]
-    cmd += ["-hls_fmp4_init_filename", f"{profile.name}_init.mp4"]
-    cmd += ["-hls_segment_filename", seg_pattern]
-    cmd += ["-hls_flags", "independent_segments+split_by_time"]
-    cmd += ["-start_number", "0"]
-    cmd.append(playlist)
+    # ── WebM output (multi-resolution) ─────────────────────────────────
+    # Multi-resolution .webm replaces HLS.  The HLS/fMP4 block below is
+    # kept as a comment so it can be revived if HLS is needed again.
+    # ────────────────────────────────────────────────────────────────────
+    output_file = os.path.join(cfg.output_dir, f"{profile.name}.webm")
+    cmd += ["-f", "webm"]
+    cmd.append(output_file)
+
+    # --- HLS revivable block -------------------------------------------
+    # To switch back to HLS, replace the 3 lines above with the 8 lines
+    # below (and re-enable the segment-stat block in the "revivable"
+    # section further down).
+    #
+    # cmd += ["-hls_time", str(cfg.hls.segment_duration)]
+    # cmd += ["-hls_playlist_type", cfg.hls.playlist_type]
+    # cmd += ["-hls_segment_type", cfg.hls.segment_type]
+    # cmd += ["-hls_fmp4_init_filename", f"{profile.name}_init.mp4"]
+    # cmd += ["-hls_segment_filename", seg_pattern]
+    # cmd += ["-hls_flags", "independent_segments+split_by_time"]
+    # cmd += ["-start_number", "0"]
+    # cmd.append(playlist)
+    # -------------------------------------------------------------------
 
     proc = log.run_cmd(cmd, module="transcode")
     _cleanup_textfiles()
@@ -114,19 +128,36 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
         log.info("transcode", f"ERROR: {profile.name} failed:\n{proc.stderr[-500:]}")
         sys.exit(1)
 
-    segs = list(Path(cfg.output_dir).glob(f"{profile.name}_*.m4s"))
-    init = Path(cfg.output_dir) / f"{profile.name}_init.mp4"
-    total_bytes = sum(f.stat().st_size for f in segs)
-    if init.exists():
-        total_bytes += init.stat().st_size
-    total_mb = total_bytes / (1024 * 1024)
+    # ── WebM file size stats ──────────────────────────────────────────
+    file_size = os.path.getsize(output_file)
+    file_mb = file_size / (1024 * 1024)
 
-    reduction_bytes = meta.source_size_bytes - total_bytes
+    reduction_bytes = meta.source_size_bytes - file_size
     reduction_pct = (reduction_bytes / meta.source_size_bytes * 100) if meta.source_size_bytes > 0 else 0
     sign = "-" if reduction_bytes >= 0 else "+"
 
-    log.info("transcode", f"{profile.name}: {len(segs)} segments, {total_mb:.1f} MB"
+    log.info("transcode", f"{profile.name}: {file_mb:.1f} MB"
              f"  ({sign}{abs(reduction_bytes) / (1024*1024):.1f} MB,"
              f" {sign}{abs(reduction_pct):.1f}%)")
+
+    # --- HLS revivable segment stats ----------------------------------
+    # Uncomment when switching back to HLS (and re-enable the HLS ffmpeg
+    # flags above).  Also comment out the WebM file_size block above.
+    #
+    # segs = list(Path(cfg.output_dir).glob(f"{profile.name}_*.m4s"))
+    # init = Path(cfg.output_dir) / f"{profile.name}_init.mp4"
+    # total_bytes = sum(f.stat().st_size for f in segs)
+    # if init.exists():
+    #     total_bytes += init.stat().st_size
+    # total_mb = total_bytes / (1024 * 1024)
+    #
+    # reduction_bytes = meta.source_size_bytes - total_bytes
+    # reduction_pct = (reduction_bytes / meta.source_size_bytes * 100) if meta.source_size_bytes > 0 else 0
+    # sign = "-" if reduction_bytes >= 0 else "+"
+    #
+    # log.info("transcode", f"{profile.name}: {len(segs)} segments, {total_mb:.1f} MB"
+    #          f"  ({sign}{abs(reduction_bytes) / (1024*1024):.1f} MB,"
+    #          f" {sign}{abs(reduction_pct):.1f}%)")
+    # -------------------------------------------------------------------
 
     return actual_res
