@@ -97,7 +97,7 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
         cmd += [param_flag, cfg.codec_params]
 
 
-    cmd += ["-c:a", "libopus", "-b:a", "96k"] # 128 160 320 (192–256) - 192k
+    cmd += ["-c:a", "libopus", "-b:a", "192k"] # 128 160 320 (192–256) - 96k
 
     # ── WebM output (multi-resolution) ─────────────────────────────────
     # Multi-resolution .webm replaces HLS.  The HLS/fMP4 block below is

@@ -57,19 +57,19 @@ class VideoConfig:
     input_video: str = ""
     output_dir: str = ""
     video_codec: str = "libsvtav1"
-    codec_params: Optional[str] = "keyint=3s:scd=0"
-    preset: str = "6"
+    codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=8:film-grain-denoise=1"
+    preset: str = "5"
     pixel_format: str = "yuv420p10le"
     hls: HlsConfig = field(default_factory=HlsConfig)
     profiles: List[Profile] = field(default_factory=lambda: [
-        # 1440p (2K)  — 2560x1440  — crf=28  maxrate=4500k  bufsize=9000k   — premium high-density desktop quality
-        Profile("1440p", 5000000, 2560, 1440, 4500, 9000, crf=28),
-        # 1080p (FHD)  — 1920x1080  — crf=30  maxrate=2500k  bufsize=5000k   — low-bitrate web sweet spot
-        Profile("1080p", 3500000, 1920, 1080, 2500, 5000, crf=30),
-        # 720p  (HD)   — 1280x720   — crf=32  maxrate=1500k  bufsize=3000k   — mobile/cellular fallback
-        Profile("720p",  2000000, 1280, 720,  1500, 3000, crf=32),
-        # 480p  (SD)   — 854x480    — crf=34  maxrate=800k   bufsize=1600k   — emergency slow-connection tier
-        Profile("480p",  1000000, 854,  480,  800,  1600, crf=34),
+        # 1440p (2K)  — 2560x1440  — crf=28  maxrate=5625k  bufsize=11250k  — premium high-density desktop quality
+        Profile("1440p", 5000000, 2560, 1440, 5625, 11250, crf=28),
+        # 1080p (FHD)  — 1920x1080  — crf=28  maxrate=3125k  bufsize=6250k   — improved quality sweet spot
+        Profile("1080p", 3500000, 1920, 1080, 3125, 6250, crf=28),
+        # 720p  (HD)   — 1280x720   — crf=30  maxrate=1875k  bufsize=3750k   — mobile/cellular fallback
+        Profile("720p",  2000000, 1280, 720,  1875, 3750, crf=30),
+        # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
+        Profile("480p",  1000000, 854,  480,  1000, 2000, crf=32),
     ])
     watermark: WatermarkConfig = field(default_factory=WatermarkConfig)
     rate_control_maxrate: Optional[int] = None
@@ -114,8 +114,8 @@ class AppConfig:
 
     # Video defaults
     video_codec: str = "libsvtav1"
-    video_codec_params: Optional[str] = "keyint=3s:scd=0"
-    video_preset: str = "6"
+    video_codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=8:film-grain-denoise=1"
+    video_preset: str = "5"
     video_pix_fmt: str = "yuv420p10le"
 
     hls_segment_duration: int = 4
@@ -132,7 +132,7 @@ class AppConfig:
     preview_duration: int = 5
 
     # Image defaults
-    image_quality: int = 100
+    image_quality: int = 85
     image_lossless: bool = False
     image_max_dimension: int = 0
 
@@ -202,7 +202,7 @@ class AppConfig:
             )),
             video_codec=env.get("VIDEO_CODEC", "libsvtav1"),
             video_codec_params=env.get("VIDEO_CODEC_PARAMS") or None,
-            video_preset=env.get("VIDEO_PRESET", "6"),
+            video_preset=env.get("VIDEO_PRESET", "5"),
             video_pix_fmt=env.get("VIDEO_PIX_FMT", "yuv420p10le"),
             rate_control_maxrate=int(env["RATE_CONTROL_MAXRATE"]) if "RATE_CONTROL_MAXRATE" in env else None,
             rate_control_bufsize=int(env["RATE_CONTROL_BUFSIZE"]) if "RATE_CONTROL_BUFSIZE" in env else None,
@@ -212,7 +212,7 @@ class AppConfig:
             log_level=os.environ.get("LOG_LEVEL", env.get("LOG_LEVEL", "INFO")).upper(),
             profiles=profiles,
             preview_duration=int(env.get("PREVIEW_DURATION", "5")),
-            image_quality=int(env.get("AVIF_QUALITY", "82")),
+            image_quality=int(env.get("AVIF_QUALITY", "85")),
             image_lossless=(env.get("AVIF_LOSSLESS", "false").lower()
                             in ("true", "1", "yes")),
             image_max_dimension=int(env.get("AVIF_MAX_DIMENSION", "0")),
@@ -236,14 +236,14 @@ class AppConfig:
     def _load_profiles(raw: str) -> List[Profile]:
         if not raw:
             return [
-                # 1440p (2K)  — 2560x1440  — crf=28  maxrate=4500k  bufsize=9000k   — premium high-density desktop quality
-                Profile("1440p", 5000000, 2560, 1440, 4500, 9000, crf=28),
-                # 1080p (FHD)  — 1920x1080  — crf=30  maxrate=2500k  bufsize=5000k   — low-bitrate web sweet spot
-                Profile("1080p", 3500000, 1920, 1080, 2500, 5000, crf=30),
-                # 720p  (HD)   — 1280x720   — crf=32  maxrate=1500k  bufsize=3000k   — mobile/cellular fallback
-                Profile("720p",  2000000, 1280, 720,  1500, 3000, crf=32),
-                # 480p  (SD)   — 854x480    — crf=34  maxrate=800k   bufsize=1600k   — emergency slow-connection tier
-                Profile("480p",  1000000, 854,  480,  800,  1600, crf=34),
+                # 1440p (2K)  — 2560x1440  — crf=28  maxrate=5625k  bufsize=11250k  — premium high-density desktop quality
+                Profile("1440p", 5000000, 2560, 1440, 5625, 11250, crf=28),
+                # 1080p (FHD)  — 1920x1080  — crf=28  maxrate=3125k  bufsize=6250k   — improved quality sweet spot
+                Profile("1080p", 3500000, 1920, 1080, 3125, 6250, crf=28),
+                # 720p  (HD)   — 1280x720   — crf=30  maxrate=1875k  bufsize=3750k   — mobile/cellular fallback
+                Profile("720p",  2000000, 1280, 720,  1875, 3750, crf=30),
+                # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
+                Profile("480p",  1000000, 854,  480,  1000, 2000, crf=32),
             ]
         try:
             data = json.loads(raw)
