@@ -94,11 +94,8 @@ def run(cfg: ImageConfig) -> int:
         elif filter_string:
             cmd += ["-vf", filter_string]
 
-        if cfg.lossless:
-            crf = 0
-        else:
-            # Map quality 0-100 to CRF 63-18 (lower CRF = better quality)
-            crf = max(0, 63 - int(cfg.quality * 0.45))
+        crf = cfg.crf
+        log.debug("process", f"avif crf={crf}")
         cmd += ["-c:v", "libsvtav1", "-crf", str(crf), "-pix_fmt", "yuv420p10le", out_path]
 
         proc = log.run_cmd(cmd, module="process")

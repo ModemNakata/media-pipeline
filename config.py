@@ -86,8 +86,7 @@ class VideoConfig:
 class ImageConfig:
     input_dir: str = ""
     output_dir: str = ""
-    quality: int = 100
-    lossless: bool = False
+    crf: int = 25
     max_dimension: int = 0
     watermark: WatermarkConfig = field(default_factory=WatermarkConfig)
 
@@ -135,8 +134,7 @@ class AppConfig:
     preview_duration: int = 5
 
     # Image defaults
-    image_quality: int = 85
-    image_lossless: bool = False
+    image_crf: int = 25
     image_max_dimension: int = 0
 
     # Blur defaults (paywalled gallery images)
@@ -216,9 +214,7 @@ class AppConfig:
             log_level=os.environ.get("LOG_LEVEL", env.get("LOG_LEVEL", "INFO")).upper(),
             profiles=profiles,
             preview_duration=int(env.get("PREVIEW_DURATION", "5")),
-            image_quality=int(env.get("AVIF_QUALITY", "85")),
-            image_lossless=(env.get("AVIF_LOSSLESS", "false").lower()
-                            in ("true", "1", "yes")),
+            image_crf=int(env.get("AVIF_CRF", "25")),
             image_max_dimension=int(env.get("AVIF_MAX_DIMENSION", "0")),
 
             blur_sigma=float(env.get("BLUR_SIGMA", "20")),
@@ -305,8 +301,7 @@ class AppConfig:
         return ImageConfig(
             input_dir=input_dir,
             output_dir=output_dir,
-            quality=self.image_quality,
-            lossless=self.image_lossless,
+            crf=self.image_crf,
             max_dimension=self.image_max_dimension,
             watermark=WatermarkConfig(
                 enabled=self.watermark_enabled,
