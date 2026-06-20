@@ -239,14 +239,15 @@ class AppConfig:
         if not raw:
             return [
                 # NOTE: bitrate column doesn't say anything, it's artificial value
+                # maxrate and bufsize is a hard limit that we should avoid to reach because video tears in pixels if scene is too complicated and we hit maxrate or bufsize limits
                 # 1440p (2K)  — 2560x1440  — crf=28  maxrate=5625k  bufsize=11250k  — premium high-density desktop quality
-                Profile("1440p", 5000000, 2560, 1440, int(5625*2), int(11250*2), crf=18),
+                Profile("1440p", 5000000, 2560, 1440, int(5625*2), int(11250*2), crf=28),
                 # 1080p (FHD)  — 1920x1080  — crf=28  maxrate=3125k  bufsize=6250k   — improved quality sweet spot
-                Profile("1080p", 3500000, 1920, 1080, int(3125*2), int(6250*2), crf=20),
+                Profile("1080p", 3500000, 1920, 1080, int(3125*2), int(6250*2), crf=30),
                 # 720p  (HD)   — 1280x720   — crf=30  maxrate=1875k  bufsize=3750k   — mobile/cellular fallback
-                Profile("720p",  2000000, 1280, 720,  int(1875*2), int(3750*2), crf=24),
+                Profile("720p",  2000000, 1280, 720,  int(1875*2), int(3750*2), crf=32),
                 # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
-                Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=26),
+                Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=34),
             ]
         try:
             data = json.loads(raw)
