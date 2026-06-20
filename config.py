@@ -103,6 +103,7 @@ class ImageConfig:
 class AppConfig:
     s3_endpoint: str = ""
     s3_access_key: str = ""
+    pipeline_rand_hex: str = ""
     s3_secret_key: str = ""
     s3_region: str = "us-east-1"
     s3_bucket: str = "fevid"
@@ -186,6 +187,7 @@ class AppConfig:
         return cls(
             s3_endpoint=env.get("S3_ENDPOINT", ""),
             s3_access_key=env.get("S3_ACCESS_KEY", ""),
+            pipeline_rand_hex=env.get("PIPELINE_RAND_HEX", ""), # PIPE
             s3_secret_key=env.get("S3_SECRET_KEY", ""),
             s3_region=env.get("S3_REGION", "us-east-1"),
             s3_bucket=env.get("S3_BUCKET", "fevid"),
@@ -341,6 +343,7 @@ class AppConfig:
     def dest_bucket_path(self) -> str:
         return f"{self.mc_alias}/{self.s3_bucket}"
 
+#pipe
 
 # ═══════════════════════════════════════════════════════════════════════
 # Helpers

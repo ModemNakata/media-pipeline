@@ -110,7 +110,7 @@ def mark_failed(cfg: AppConfig, content_id: str) -> bool:
 
 def _patch(cfg: AppConfig, content_id: str, body: dict[str, Any]) -> bool:
     url = f"{cfg.api_base_url}/api/content/{content_id}/status"
-    headers = {"X-Api-Key": cfg.s3_access_key}
+    headers = {"X-Api-Key": cfg.pipeline_rand_hex}
 
     print(f"[api] PATCH {url} -> {json.dumps(body)}")
     result = _json_request(url, method="PATCH", headers=headers, body=body,
