@@ -6,7 +6,15 @@ import log
 from config import AppConfig
 
 
+def _clear_dest(s3_dest: str) -> None:
+    log.info("upload", f"mc rm --recursive {s3_dest}")
+    log.run_cmd(
+        ["mc", "rm", "--recursive", "--force", s3_dest],
+        module="upload",
+    )
+
 def upload_dir(cfg: AppConfig, local_dir: Path, s3_dest: str) -> None:
+    _clear_dest(s3_dest)
     src = f"{local_dir}/"
     log.info("upload", f"mc cp --recursive {src} -> {s3_dest}")
     proc = log.run_cmd(
