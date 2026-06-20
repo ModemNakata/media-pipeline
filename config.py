@@ -249,6 +249,17 @@ class AppConfig:
                 # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
                 Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=34),
             ]
+
+# ALTERNATIVE: (higher quality, but can inflate video size worse)
+# -                Profile("1440p", 5000000, 2560, 1440, int(5625*2), int(11250*2), crf=18),
+# 
+# -                Profile("1080p", 3500000, 1920, 1080, int(3125*2), int(6250*2), crf=20),
+# 
+# -                Profile("720p",  2000000, 1280, 720,  int(1875*2), int(3750*2), crf=24),
+# 
+# -                Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=26),
+
+        
         try:
             data = json.loads(raw)
             return [Profile(**d) for d in data]
