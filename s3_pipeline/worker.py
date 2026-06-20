@@ -80,10 +80,12 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
         free_preview_path = ""
         free_preview_output_dir: Path | None = None
         blurred_files: list[str] = []
+        uploaded_s3_prefix = ""
 
         if content_type == "video":
+            uploaded_s3_prefix = f"videos/{content_id}"
             upload.upload_video(cfg, output_dir, content_id)
-            s3_prefix = f"videos/{content_id}"
+            s3_prefix = uploaded_s3_prefix
             thumbnail_url = f"{s3_prefix}/thumbnail.avif"
             preview_path = f"{s3_prefix}/preview.webm"
             if is_paywalled and free_preview_output_dir:
@@ -94,8 +96,9 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
                     upload.upload_file(cfg, fp_local, fp_s3_key)
                     free_preview_path = fp_s3_key
         else:
+            uploaded_s3_prefix = f"galleries/{content_id}"
             upload.upload_images(cfg, output_dir, content_id)
-            s3_prefix = f"galleries/{content_id}"
+            s3_prefix = uploaded_s3_prefix
             thumbnail_url = ""
             preview_path = f"{s3_prefix}/preview.avif"
             processed_files = [
@@ -120,6 +123,9 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
                             source_resolution=source_resolution,
                             video_formats=video_formats if content_type == "video" else None)
         if not ok:
+            s3_dest = f"{cfg.mc_alias}/{cfg.s3_bucket}/{uploaded_s3_prefix}/"
+            print(f"[worker] API returned error, removing uploaded files at {s3_dest}")
+            upload.remove_dir(cfg, s3_dest)
             print(f"[worker] WARNING: API returned error for mark_ready, "
                   f"content may remain in 'processing' state")
 

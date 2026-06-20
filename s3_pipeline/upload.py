@@ -28,6 +28,14 @@ def upload_dir(cfg: AppConfig, local_dir: Path, s3_dest: str) -> None:
     print(f"[upload] done ({total / (1024*1024):.1f} MB uploaded)")
 
 
+def remove_dir(cfg: AppConfig, s3_dir: str) -> None:
+    log.info("upload", f"mc rm --recursive --force {s3_dir}")
+    log.run_cmd(
+        ["mc", "rm", "--recursive", "--force", s3_dir],
+        module="upload",
+    )
+
+
 def upload_file(cfg: AppConfig, local_path: Path, s3_key: str) -> None:
     """Upload a single file to S3_BUCKET at the given key."""
     dest = f"{cfg.mc_alias}/{cfg.s3_bucket}/{s3_key}"
