@@ -145,7 +145,7 @@ def _source_quality(min_dim: int, fps: float) -> str:
 
 def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Path,
                   free_preview_duration: int = 0
-                  ) -> tuple[Path, float, Optional[Path], str, str, dict[str, str]]:
+                  ) -> tuple[Path, float, Optional[Path], str, str, dict[str, str], dict[str, str]]:
     output_dir = workdir / content_id / "av1_output"
     print(f"[processor] ── AV1 pipeline for {content_id} ──")
     print(f"[processor] input:  {input_path}")
@@ -211,6 +211,7 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
     source_resolution = f"{meta.width}x{meta.height}"
 
     free_preview_output_dir: Optional[Path] = None
+    free_preview_video_formats: dict[str, str] = {}
     if free_preview_duration > 0:
         print(f"[processor] ── free preview (paywalled) ──")
         trimmed = workdir / content_id / "free_preview_trimmed.mp4"
@@ -247,16 +248,20 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
                     )
                     fp_profiles.insert(0, fp_src)
             print(f"[processor] free preview active profiles: {[p.name for p in fp_profiles]}")
-            # Transcode only the lowest profile for free preview
-            lowest_fp = fp_profiles[-1]
-            transcode.run(fp_vcfg, lowest_fp, fp_meta)
-            print(f"[processor] free preview .webm written")
+            fp_actual: dict[str, str] = {}
+            for p in fp_profiles:
+                fp_actual[p.name] = transcode.run(fp_vcfg, p, fp_meta)
+            print(f"[processor] free preview done")
+            fp_prefix = f"videos/{content_id}/free_preview"
+            for p in fp_profiles:
+                res = fp_actual.get(p.name, f"{p.ref_width}x?")
+                free_preview_video_formats[res] = f"{fp_prefix}/{p.name}.webm"
 
     sq = _source_quality(meta.min_dim, meta.fps)
     print(f"[processor] source quality: {sq}")
     print(f"[processor] source resolution: {source_resolution}")
     print(f"[processor] AV1 pipeline complete for {content_id}")
-    return output_dir, meta.duration_s, free_preview_output_dir, sq, source_resolution, video_formats
+    return output_dir, meta.duration_s, free_preview_output_dir, sq, source_resolution, video_formats, free_preview_video_formats
 
 
 def _generate_image_preview(input_path: Path, output_dir: Path) -> Optional[Path]:

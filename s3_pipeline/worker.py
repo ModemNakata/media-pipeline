@@ -57,11 +57,13 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
         source_resolution = ""
         video_formats: dict[str, str] = {}
         processed_files: list[str] = []
+        free_preview_output_dir: Path | None = None
+        free_preview_video_formats: dict[str, str] = {}
 
         if content_type == "video":
             if len(local_paths) != 1:
                 raise ValueError(f"expected 1 file for video, got {len(local_paths)}")
-            output_dir, duration, free_preview_output_dir, source_quality, source_resolution, video_formats = proc.process_video(
+            output_dir, duration, free_preview_output_dir, source_quality, source_resolution, video_formats, free_preview_video_formats = proc.process_video(
                 cfg, local_paths[0], content_id, cfg.work_dir,
                 free_preview_duration=free_preview_duration_s if is_paywalled else 0)
         elif content_type == "image_set":
@@ -77,8 +79,6 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
         log.debug("worker", f"encoding completed in {elapsed:.3f}s")
 
         print(f"\n--- step 3/4: upload to S3_BUCKET ---")
-        free_preview_path = ""
-        free_preview_output_dir: Path | None = None
         blurred_files: list[str] = []
         uploaded_s3_prefix = ""
 
@@ -89,12 +89,8 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
             thumbnail_url = f"{s3_prefix}/thumbnail.avif"
             preview_path = f"{s3_prefix}/preview.webm"
             if is_paywalled and free_preview_output_dir:
-                fp_files = list(free_preview_output_dir.glob("*.webm"))
-                if fp_files:
-                    fp_local = fp_files[0]
-                    fp_s3_key = f"videos/{content_id}/free_preview.webm"
-                    upload.upload_file(cfg, fp_local, fp_s3_key)
-                    free_preview_path = fp_s3_key
+                fp_dest = f"{cfg.mc_alias}/{cfg.s3_bucket}/videos/{content_id}/free_preview/"
+                upload.upload_dir(cfg, free_preview_output_dir, fp_dest)
         else:
             uploaded_s3_prefix = f"galleries/{content_id}"
             upload.upload_images(cfg, output_dir, content_id)
@@ -117,7 +113,7 @@ def process_item(cfg: AppConfig, item: dict[str, Any]) -> bool:
                             preview_path=preview_path,
                             duration=duration,
                             processed_files=processed_files if content_type == "image_set" else None,
-                            free_preview_path=free_preview_path,
+                            free_preview_video_formats=free_preview_video_formats if is_paywalled else None,
                             blurred_files=blurred_files if is_paywalled else None,
                             source_quality=source_quality,
                             source_resolution=source_resolution,

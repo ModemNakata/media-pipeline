@@ -77,7 +77,7 @@ def mark_ready(cfg: AppConfig, content_id: str,
                thumbnail_url: str = "", preview_path: str = "",
                duration: float = 0,
                processed_files: Optional[list[str]] = None,
-               free_preview_path: str = "",
+               free_preview_video_formats: Optional[dict[str, str]] = None,
                blurred_files: Optional[list[str]] = None,
                source_quality: str = "",
                source_resolution: str = "",
@@ -91,8 +91,6 @@ def mark_ready(cfg: AppConfig, content_id: str,
         body["duration"] = round(duration, 2)
     if processed_files:
         body["processed_files"] = processed_files
-    if free_preview_path:
-        body["free_preview_path"] = free_preview_path
     if blurred_files:
         body["blurred_files"] = blurred_files
     if source_quality:
@@ -100,7 +98,16 @@ def mark_ready(cfg: AppConfig, content_id: str,
     if source_resolution:
         body["source_resolution"] = source_resolution
     if video_formats:
-        body["video_formats"] = video_formats
+        if free_preview_video_formats:
+            formats: dict[str, dict[str, str]] = {}
+            for res, path in video_formats.items():
+                entry: dict[str, str] = {"storage_path": path}
+                if res in free_preview_video_formats:
+                    entry["free_preview_path"] = free_preview_video_formats[res]
+                formats[res] = entry
+            body["video_formats"] = formats
+        else:
+            body["video_formats"] = video_formats
     return _patch(cfg, content_id, body)
 
 
