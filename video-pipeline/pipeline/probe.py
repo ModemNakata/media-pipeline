@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 from dataclasses import dataclass
 
 import log
@@ -46,8 +45,7 @@ def probe(cfg: VideoConfig) -> VideoMeta:
     ]
     proc = log.run_cmd(cmd, module="probe")
     if proc.returncode != 0:
-        log.info("probe", f"ffprobe failed:\n{proc.stderr}")
-        sys.exit(1)
+        raise RuntimeError(f"ffprobe failed:\n{proc.stderr}")
 
     try:
         data = json.loads(proc.stdout)
@@ -62,8 +60,7 @@ def probe(cfg: VideoConfig) -> VideoMeta:
         br = int(br) if br not in ("N/A", "0") else 0
         dur = float(fmt.get("duration", 0))
     except (KeyError, IndexError, ValueError) as e:
-        print(f"[probe] failed to parse ffprobe output: {e}")
-        sys.exit(1)
+        raise RuntimeError(f"failed to parse ffprobe output: {e}")
 
     audio_br = 0
     audio_codec = ""

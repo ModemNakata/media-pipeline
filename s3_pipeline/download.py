@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import log
@@ -17,8 +16,7 @@ def download_file(cfg: AppConfig, s3_key: str, local_path: Path) -> Path:
         module="download",
     )
     if proc.returncode != 0:
-        log.info("download", f"ERROR:\n{proc.stderr}")
-        sys.exit(1)
+        raise RuntimeError(f"download failed for {s3_key}:\n{proc.stderr}")
 
     size = local_path.stat().st_size
     print(f"[download] done ({size / 1024:.1f} KB)")

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import sys
 import tempfile
 from pathlib import Path
 
@@ -133,8 +132,7 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
     proc = log.run_cmd(cmd, module="transcode")
     _cleanup_textfiles()
     if proc.returncode != 0:
-        log.info("transcode", f"ERROR: {profile.name} failed:\n{proc.stderr[-500:]}")
-        sys.exit(1)
+        raise RuntimeError(f"transcode failed for {profile.name}:\n{proc.stderr[-500:]}")
 
     # ── WebM file size stats ──────────────────────────────────────────
     file_size = os.path.getsize(output_file)

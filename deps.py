@@ -15,8 +15,7 @@ def check_video(cfg: VideoConfig) -> None:
             sys.exit(1)
 
     if not os.path.exists(cfg.input_video):
-        print(f"[deps] ERROR: input file '{cfg.input_video}' not found")
-        sys.exit(1)
+        raise RuntimeError(f"input file '{cfg.input_video}' not found")
 
     r = log.run_cmd(["ffmpeg", "-encoders"], module="deps")
     if cfg.video_codec not in r.stdout:
@@ -33,8 +32,7 @@ def check_image(cfg: ImageConfig) -> None:
             sys.exit(1)
 
     if not os.path.isdir(cfg.input_dir):
-        print(f"[deps] ERROR: input directory '{cfg.input_dir}' not found")
-        sys.exit(1)
+        raise RuntimeError(f"input directory '{cfg.input_dir}' not found")
 
     r = log.run_cmd(["ffmpeg", "-encoders"], module="deps")
     if "libsvtav1" not in r.stdout:

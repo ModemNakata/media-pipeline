@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import sys
 import tempfile
 from pathlib import Path
 
@@ -116,8 +115,7 @@ def run(cfg: ImageConfig) -> int:
         _cleanup_textfile(textfile)
 
     if count == 0:
-        log.info("process", f"ERROR: no convertible image files found in '{cfg.input_dir}'")
-        sys.exit(1)
+        raise RuntimeError(f"no convertible image files found in '{cfg.input_dir}'")
 
     skip_msg = f", {skipped} skipped" if skipped else ""
     log.info("process", f"converted {count} image(s): "
