@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import tempfile
-from pathlib import Path
+# from pathlib import Path
 
 import log
 from config import VideoConfig, Profile, build_scale, calc_font_size
@@ -71,8 +71,8 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
              f"crf={profile.crf}{rate_label}"
              f"{'  (passthrough)' if profile.passthrough else ''}{wm_label}")
 
-    playlist = os.path.join(cfg.output_dir, f"{profile.name}.m3u8")
-    seg_pattern = os.path.join(cfg.output_dir, f"{profile.name}_%03d.m4s")
+    # playlist = os.path.join(cfg.output_dir, f"{profile.name}.m3u8")
+    # seg_pattern = os.path.join(cfg.output_dir, f"{profile.name}_%03d.m4s")
 
     cmd = ["ffmpeg", "-y", "-i", cfg.input_video]
     if filter_parts:
@@ -92,6 +92,7 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
     # "-colorspace",
     # "bt709",
     # ]
+    # cmd += ["-threads", "2"]
     cmd += ["-fps_mode", "cfr"]
 
     if cfg.codec_params:

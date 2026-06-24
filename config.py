@@ -360,14 +360,18 @@ def filter_profiles(profiles: List[Profile], source_min_dim: int) -> List[Profil
     return [p for p in profiles if source_min_dim >= p.threshold]
 
 
+# don't add lanczos - it will use `bicubic` instead
+# let's use lanczos because it doesn't cost any CPU time actually
 def build_scale(profile: Profile, src_w: int, src_h: int) -> Tuple[Optional[str], str]:
     if profile.passthrough:
         return None, f"{src_w}x{src_h}"
     if src_w >= src_h:
         w = profile.ref_width
         h = int(w * src_h / src_w / 2) * 2
+        # return f"scale={w}:-2", f"{w}x{h}"
         return f"scale={w}:-2:flags=lanczos", f"{w}x{h}"
     else:
         h = profile.ref_width
         w = int(h * src_w / src_h / 2) * 2
+        # return f"scale=-2:{h}", f"{w}x{h}"
         return f"scale=-2:{h}:flags=lanczos", f"{w}x{h}"
