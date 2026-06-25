@@ -59,7 +59,7 @@ class VideoConfig:
     video_codec: str = "libsvtav1"
     codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=0:film-grain-denoise=0"
     preset: Optional[str] = None
-    pixel_format: str = "yuv420p10le"
+    pixel_format: Optional[str] = None
     # -color_primaries bt709 -color_trc bt709 -colorspace bt709"
     hls: HlsConfig = field(default_factory=HlsConfig)
     # can actually set crf to 20-24
@@ -118,7 +118,7 @@ class AppConfig:
     video_codec: str = "libsvtav1"
     video_codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=0:film-grain-denoise=0"
     video_preset: Optional[str] = None
-    video_pix_fmt: str = "yuv420p10le"
+    video_pix_fmt: Optional[str] = None
 
     hls_segment_duration: int = 4
     hls_segment_type: str = "fmp4"
@@ -205,7 +205,7 @@ class AppConfig:
             video_codec=env.get("VIDEO_CODEC", "libsvtav1"),
             video_codec_params=env.get("VIDEO_CODEC_PARAMS") or None,
             video_preset=env.get("VIDEO_PRESET") or None,
-            video_pix_fmt=env.get("VIDEO_PIX_FMT", "yuv420p10le"),
+            video_pix_fmt=env.get("VIDEO_PIX_FMT") or None,
             rate_control_maxrate=int(env["RATE_CONTROL_MAXRATE"]) if "RATE_CONTROL_MAXRATE" in env else None,
             rate_control_bufsize=int(env["RATE_CONTROL_BUFSIZE"]) if "RATE_CONTROL_BUFSIZE" in env else None,
             hls_segment_duration=int(env.get("HLS_SEGMENT_DURATION", "4")),
@@ -249,7 +249,7 @@ class AppConfig:
                 Profile("720p",  1280, 720),
                 # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
                 # Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=34),
-                Profile("480p",  854,  480),
+                # Profile("480p",  854,  480),
             ]
 
 # ALTERNATIVE: (higher quality, but can inflate video size worse)
@@ -372,10 +372,10 @@ def build_scale(profile: Profile, src_w: int, src_h: int) -> Tuple[Optional[str]
     if src_w >= src_h:
         w = profile.ref_width
         h = int(w * src_h / src_w / 2) * 2
-        # return f"scale={w}:-2", f"{w}x{h}"
-        return f"scale={w}:-2:flags=lanczos", f"{w}x{h}"
+        return f"scale={w}:-2", f"{w}x{h}"
+        # return f"scale={w}:-2:flags=lanczos", f"{w}x{h}"
     else:
         h = profile.ref_width
         w = int(h * src_w / src_h / 2) * 2
-        # return f"scale=-2:{h}", f"{w}x{h}"
-        return f"scale=-2:{h}:flags=lanczos", f"{w}x{h}"
+        return f"scale=-2:{h}", f"{w}x{h}"
+        # return f"scale=-2:{h}:flags=lanczos", f"{w}x{h}"

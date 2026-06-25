@@ -86,7 +86,8 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
         cmd += ["-bufsize", f"{actual_bufsize}k"]
     if cfg.preset is not None:
         cmd += ["-preset", cfg.preset]
-    cmd += ["-pix_fmt", cfg.pixel_format]
+    if cfg.pixel_format is not None:
+        cmd += ["-pix_fmt", cfg.pixel_format]
     # cmd += [
     # "-color_primaries",
     # "bt709",
