@@ -70,7 +70,8 @@ def _generate_thumbnail(input_path: Path, output_dir: Path,
         "-vframes", "1",
         "-vf", f"scale={tw}:{th}:force_original_aspect_ratio=increase,"
                f"crop={tw}:{th}",
-        "-c:v", "libsvtav1", "-crf", "27", "-pix_fmt", "yuv420p10le",
+        "-c:v", "libsvtav1",
+        # "-crf", "27", "-pix_fmt", "yuv420p10le",
         str(out),
     ]
     proc = log.run_cmd(cmd, module="processor")
@@ -267,7 +268,8 @@ def _generate_image_preview(input_path: Path, output_dir: Path) -> Optional[Path
         "ffmpeg", "-y", "-i", str(input_path),
         "-vf", "crop='min(iw,ih)':'min(iw,ih)',"
                "scale='min(720,iw)':'min(720,ih)'",
-        "-c:v", "libsvtav1", "-crf", "27", "-pix_fmt", "yuv420p10le",
+        "-c:v", "libsvtav1",
+        # "-crf", "27", "-pix_fmt", "yuv420p10le",  # revivable (added after -c:v)
         str(out),
     ]
     proc = log.run_cmd(cmd, module="processor")
