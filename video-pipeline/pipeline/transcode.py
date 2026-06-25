@@ -60,15 +60,16 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
     actual_maxrate = cfg.rate_control_maxrate or maxrate
     actual_bufsize = cfg.rate_control_bufsize or bufsize
     rate_label = ""
-    rate_control_active = maxrate > 0
+    rate_control_active = maxrate is not None and maxrate > 0
     if rate_control_active:
         rate_label = f"  maxrate={actual_maxrate}k  bufsize={actual_bufsize}k"
     else:
         rate_label = "  (no rate control)"
 
+    crf_label = f"crf={profile.crf}" if profile.crf is not None else "crf=auto"
     wm_label = " +wm" if cfg.watermark.enabled else ""
     log.info("transcode", f"{profile.name} ({actual_res})  "
-             f"crf={profile.crf}{rate_label}"
+             f"{crf_label}{rate_label}"
              f"{'  (passthrough)' if profile.passthrough else ''}{wm_label}")
 
     # playlist = os.path.join(cfg.output_dir, f"{profile.name}.m3u8")
@@ -78,7 +79,8 @@ def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
     if filter_parts:
         cmd += ["-vf", ",".join(filter_parts)]
     cmd += ["-c:v", cfg.video_codec]
-    cmd += ["-crf", str(profile.crf)]
+    if profile.crf is not None:
+        cmd += ["-crf", str(profile.crf)]
     if rate_control_active:
         cmd += ["-maxrate", f"{actual_maxrate}k"]
         cmd += ["-bufsize", f"{actual_bufsize}k"]

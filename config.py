@@ -39,9 +39,9 @@ class Profile:
     bandwidth: int
     ref_width: int
     threshold: int
-    maxrate_kbps: int
-    bufsize_kbps: int
-    crf: int = 30
+    maxrate_kbps: Optional[int] = None
+    bufsize_kbps: Optional[int] = None
+    crf: Optional[int] = None
     passthrough: bool = False
 
 
@@ -86,7 +86,7 @@ class VideoConfig:
 class ImageConfig:
     input_dir: str = ""
     output_dir: str = ""
-    crf: int = 25
+    crf: Optional[int] = None
     max_dimension: int = 0
     watermark: WatermarkConfig = field(default_factory=WatermarkConfig)
 

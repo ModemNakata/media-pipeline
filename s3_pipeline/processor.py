@@ -171,8 +171,8 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
             bandwidth=int(meta.bitrate_bps * 1.1),
             ref_width=meta.min_dim,
             threshold=meta.min_dim,
-            maxrate_kbps=0,
-            bufsize_kbps=0,
+            maxrate_kbps=None,
+            bufsize_kbps=None,
             passthrough=True,
         )
         profiles = [src_profile]
@@ -187,8 +187,8 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
                 bandwidth=int(meta.bitrate_bps * 1.1),
                 ref_width=meta.min_dim,
                 threshold=meta.min_dim,
-                maxrate_kbps=0,
-                bufsize_kbps=0,
+                maxrate_kbps=None,
+                bufsize_kbps=None,
                 passthrough=True,
             )
             profiles.insert(0, src_profile)
@@ -228,8 +228,8 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
                     bandwidth=int(fp_meta.bitrate_bps * 1.1),
                     ref_width=fp_meta.min_dim,
                     threshold=fp_meta.min_dim,
-                    maxrate_kbps=0,
-                    bufsize_kbps=0,
+                    maxrate_kbps=None,
+                    bufsize_kbps=None,
                     passthrough=True,
                 )
                 fp_profiles = [fp_src]
@@ -242,8 +242,8 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
                         bandwidth=int(fp_meta.bitrate_bps * 1.1),
                         ref_width=fp_meta.min_dim,
                         threshold=fp_meta.min_dim,
-                        maxrate_kbps=0,
-                        bufsize_kbps=0,
+                        maxrate_kbps=None,
+                        bufsize_kbps=None,
                         passthrough=True,
                     )
                     fp_profiles.insert(0, fp_src)

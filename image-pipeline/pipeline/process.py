@@ -94,8 +94,10 @@ def run(cfg: ImageConfig) -> int:
             cmd += ["-vf", filter_string]
 
         crf = cfg.crf
-        log.debug("process", f"avif crf={crf}")
-        cmd += ["-c:v", "libsvtav1", "-crf", str(crf), "-pix_fmt", "yuv420p10le", out_path]
+        cmd += ["-c:v", "libsvtav1", "-pix_fmt", "yuv420p10le"]
+        if crf is not None:
+            cmd += ["-crf", str(crf)]
+        cmd.append(out_path)
 
         proc = log.run_cmd(cmd, module="process")
         if proc.returncode != 0:
