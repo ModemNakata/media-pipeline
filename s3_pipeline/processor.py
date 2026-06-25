@@ -168,7 +168,6 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
     if not profiles:
         src_profile = Profile(
             name=f"{meta.min_dim}p",
-            bandwidth=int(meta.bitrate_bps * 1.1),
             ref_width=meta.min_dim,
             threshold=meta.min_dim,
             maxrate_kbps=None,
@@ -184,7 +183,6 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
             src_name = f"{meta.min_dim}p"
             src_profile = Profile(
                 name=src_name,
-                bandwidth=int(meta.bitrate_bps * 1.1),
                 ref_width=meta.min_dim,
                 threshold=meta.min_dim,
                 maxrate_kbps=None,
@@ -225,7 +223,6 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
             if not fp_profiles:
                 fp_src = Profile(
                     name=f"{fp_meta.min_dim}p",
-                    bandwidth=int(fp_meta.bitrate_bps * 1.1),
                     ref_width=fp_meta.min_dim,
                     threshold=fp_meta.min_dim,
                     maxrate_kbps=None,
@@ -239,7 +236,6 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
                     fp_src_name = f"{fp_meta.min_dim}p"
                     fp_src = Profile(
                         name=fp_src_name,
-                        bandwidth=int(fp_meta.bitrate_bps * 1.1),
                         ref_width=fp_meta.min_dim,
                         threshold=fp_meta.min_dim,
                         maxrate_kbps=None,

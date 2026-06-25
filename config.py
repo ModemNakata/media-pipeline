@@ -36,7 +36,7 @@ class WatermarkConfig:
 @dataclass
 class Profile:
     name: str
-    bandwidth: int
+    # bandwidth: int
     ref_width: int
     threshold: int
     maxrate_kbps: Optional[int] = None
@@ -58,7 +58,7 @@ class VideoConfig:
     output_dir: str = ""
     video_codec: str = "libsvtav1"
     codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=0:film-grain-denoise=0"
-    preset: str = "4"
+    preset: Optional[str] = None
     pixel_format: str = "yuv420p10le"
     # -color_primaries bt709 -color_trc bt709 -colorspace bt709"
     hls: HlsConfig = field(default_factory=HlsConfig)
@@ -117,7 +117,7 @@ class AppConfig:
     # Video defaults
     video_codec: str = "libsvtav1"
     video_codec_params: Optional[str] = "keyint=3s:scd=1:film-grain=0:film-grain-denoise=0"
-    video_preset: str = "4"
+    video_preset: Optional[str] = None
     video_pix_fmt: str = "yuv420p10le"
 
     hls_segment_duration: int = 4
@@ -204,7 +204,7 @@ class AppConfig:
             )),
             video_codec=env.get("VIDEO_CODEC", "libsvtav1"),
             video_codec_params=env.get("VIDEO_CODEC_PARAMS") or None,
-            video_preset=env.get("VIDEO_PRESET", "4"),
+            video_preset=env.get("VIDEO_PRESET") or None,
             video_pix_fmt=env.get("VIDEO_PIX_FMT", "yuv420p10le"),
             rate_control_maxrate=int(env["RATE_CONTROL_MAXRATE"]) if "RATE_CONTROL_MAXRATE" in env else None,
             rate_control_bufsize=int(env["RATE_CONTROL_BUFSIZE"]) if "RATE_CONTROL_BUFSIZE" in env else None,
@@ -239,13 +239,17 @@ class AppConfig:
                 # NOTE: bitrate column doesn't say anything, it's artificial value
                 # maxrate and bufsize is a hard limit that we should avoid to reach because video tears in pixels if scene is too complicated and we hit maxrate or bufsize limits
                 # 1440p (2K)  — 2560x1440  — crf=28  maxrate=5625k  bufsize=11250k  — premium high-density desktop quality
-                Profile("1440p", 5000000, 2560, 1440, int(5625*2), int(11250*2), crf=28),
+                # Profile("1440p", 5000000, 2560, 1440, int(5625*2), int(11250*2), crf=28),
+                Profile("1440p", 2560, 1440),
                 # 1080p (FHD)  — 1920x1080  — crf=28  maxrate=3125k  bufsize=6250k   — improved quality sweet spot
-                Profile("1080p", 3500000, 1920, 1080, int(3125*2), int(6250*2), crf=30),
+                # Profile("1080p", 3500000, 1920, 1080, int(3125*2), int(6250*2), crf=30),
+                Profile("1080p", 1920, 1080),
                 # 720p  (HD)   — 1280x720   — crf=30  maxrate=1875k  bufsize=3750k   — mobile/cellular fallback
-                Profile("720p",  2000000, 1280, 720,  int(1875*2), int(3750*2), crf=32),
+                # Profile("720p",  2000000, 1280, 720,  int(1875*2), int(3750*2), crf=32),
+                Profile("720p",  1280, 720),
                 # 480p  (SD)   — 854x480    — crf=32  maxrate=1000k  bufsize=2000k   — slow-connection tier
-                Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=34),
+                # Profile("480p",  1000000, 854,  480,  int(1000*2), int(2000*2), crf=34),
+                Profile("480p",  854,  480),
             ]
 
 # ALTERNATIVE: (higher quality, but can inflate video size worse)
