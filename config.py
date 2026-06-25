@@ -134,7 +134,7 @@ class AppConfig:
     preview_duration: int = 5
 
     # Image defaults
-    image_crf: int = 25
+    image_crf: Optional[int] = None
     image_max_dimension: int = 0
 
     # Blur defaults (paywalled gallery images)
@@ -214,7 +214,7 @@ class AppConfig:
             log_level=os.environ.get("LOG_LEVEL", env.get("LOG_LEVEL", "INFO")).upper(),
             profiles=profiles,
             preview_duration=int(env.get("PREVIEW_DURATION", "5")),
-            image_crf=int(env.get("AVIF_CRF", "25")),
+            image_crf=int(env["AVIF_CRF"]) if "AVIF_CRF" in env else None,
             image_max_dimension=int(env.get("AVIF_MAX_DIMENSION", "0")),
 
             blur_sigma=float(env.get("BLUR_SIGMA", "20")),
