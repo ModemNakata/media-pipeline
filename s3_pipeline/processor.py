@@ -92,7 +92,8 @@ def _generate_preview(input_path: Path, output_dir: Path,
         "ffmpeg", "-y", "-ss", "0", "-i", str(input_path),
         "-t", str(duration), "-an",
         "-vf", f"scale={tw}:{th}:force_original_aspect_ratio=increase,crop={tw}:{th}",
-        "-c:v", "libsvtav1", "-crf", "32", "-pix_fmt", "yuv420p10le",
+        "-c:v", "libsvtav1",
+        #"-crf", "32", "-pix_fmt", "yuv420p10le",
         str(out),
     ]
     proc = log.run_cmd(cmd, module="processor")
@@ -110,7 +111,8 @@ def _generate_blurred_avif(input_path: Path, output_path: Path,
     cmd = [
         "ffmpeg", "-y", "-i", str(input_path),
         "-vf", f"gblur=sigma={sigma}:steps={steps}",
-        "-c:v", "libsvtav1", "-crf", "40", "-pix_fmt", "yuv420p10le",
+        "-c:v", "libsvtav1",
+        #"-crf", "40", "-pix_fmt", "yuv420p10le",
         str(output_path),
     ]
     proc = log.run_cmd(cmd, module="processor")

@@ -94,7 +94,8 @@ def run(cfg: ImageConfig) -> int:
             cmd += ["-vf", filter_string]
 
         crf = cfg.crf
-        cmd += ["-c:v", "libsvtav1", "-pix_fmt", "yuv420p10le"]
+        cmd += ["-c:v", "libsvtav1" ]
+            #"-pix_fmt", "yuv420p10le"]
         if crf is not None:
             cmd += ["-crf", str(crf)]
         cmd.append(out_path)
