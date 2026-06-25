@@ -85,7 +85,7 @@ def _generate_thumbnail(input_path: Path, output_dir: Path,
 def _generate_preview(input_path: Path, output_dir: Path,
                        src_w: int, src_h: int,
                        duration: int) -> Optional[Path]:
-    tw, th = _target_16x9(src_w, src_h, 360)
+    tw, th = _target_16x9(src_w, src_h, 480)
     out = output_dir / "preview.webm"
     log.info("processor", f"preview target: {tw}x{th}")
     cmd = [
