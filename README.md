@@ -1,3 +1,7 @@
+TODO:
+Enforce content size checks / gallery size count + fize check - if it's out of bounds - remove content from S3 (original) and mark upload as failed.
+
+
 # ff-s3-pipeline
 
 Media processing pipeline that downloads source files from S3 (MinIO), transcodes them, and uploads results with API status callbacks.
