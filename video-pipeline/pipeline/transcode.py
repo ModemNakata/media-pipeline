@@ -32,10 +32,12 @@ def _write_textfile(text: str) -> str:
 def run(cfg: VideoConfig, profile: Profile, meta: VideoMeta) -> str:
     maxrate = profile.maxrate_kbps
     bufsize = profile.bufsize_kbps
-    scale_filter, actual_res = build_scale(profile, meta.width, meta.height)
+    scale_filter, actual_res = build_scale(profile, meta.display_width, meta.height)
 
     watermark_text = None
     filter_parts = []
+    if meta.has_non_square_pixels:
+        filter_parts.append("scale=iw*sar:ih")
     if scale_filter:
         filter_parts.append(scale_filter)
 
