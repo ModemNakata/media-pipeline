@@ -60,16 +60,24 @@ def _target_16x9(src_w: int, src_h: int, max_short: int) -> tuple[int, int]:
 
 
 def _generate_thumbnail(input_path: Path, output_dir: Path,
-                         src_w: int, src_h: int) -> Optional[Path]:
+                         src_w: int, src_h: int,
+                         has_non_square: bool = False,
+                         seek_time: float = 5.0) -> Optional[Path]:
     tw, th = _target_16x9(src_w, src_h, 720)
     out = output_dir / "thumbnail.avif"
-    log.info("processor", f"thumbnail target: {tw}x{th}")
+    log.info("processor", f"thumbnail target: {tw}x{th}  seek={seek_time:.1f}s")
+    filter_parts = []
+    if has_non_square:
+        filter_parts.append("scale=iw*sar:ih")
+    filter_parts.append(
+        f"scale={tw}:{th}:force_original_aspect_ratio=increase,"
+        f"crop={tw}:{th}"
+    )
     cmd = [
         "ffmpeg", "-y", "-i", str(input_path),
-        "-ss", "00:00:05",
+        "-ss", f"{seek_time:.3f}",
         "-vframes", "1",
-        "-vf", f"scale={tw}:{th}:force_original_aspect_ratio=increase,"
-               f"crop={tw}:{th}",
+        "-vf", ",".join(filter_parts),
         "-c:v", "libsvtav1",
         # "-crf", "27", "-pix_fmt", "yuv420p10le",
         str(out),
@@ -78,20 +86,36 @@ def _generate_thumbnail(input_path: Path, output_dir: Path,
     if proc.returncode != 0:
         log.info("processor", f"WARNING: thumbnail failed:\n{proc.stderr[-300:]}")
         return None
-    log.info("processor", f"thumbnail: {out.name} ({out.stat().st_size / 1024:.1f} KB)")
+    size_kb = out.stat().st_size / 1024
+    if size_kb < 1:
+        log.info("processor", f"WARNING: thumbnail too small ({size_kb:.1f} KB), likely broken")
+        try:
+            out.unlink()
+        except OSError:
+            pass
+        return None
+    log.info("processor", f"thumbnail: {out.name} ({size_kb:.1f} KB)")
     return out
 
 
 def _generate_preview(input_path: Path, output_dir: Path,
-                       src_w: int, src_h: int,
-                       duration: int) -> Optional[Path]:
+                        src_w: int, src_h: int,
+                        duration: int,
+                        has_non_square: bool = False) -> Optional[Path]:
     tw, th = _target_16x9(src_w, src_h, 480)
     out = output_dir / "preview.webm"
     log.info("processor", f"preview target: {tw}x{th}")
+    filter_parts = []
+    if has_non_square:
+        filter_parts.append("scale=iw*sar:ih")
+    filter_parts.append(
+        f"scale={tw}:{th}:force_original_aspect_ratio=increase,"
+        f"crop={tw}:{th}"
+    )
     cmd = [
         "ffmpeg", "-y", "-ss", "0", "-i", str(input_path),
         "-t", str(duration), "-an",
-        "-vf", f"scale={tw}:{th}:force_original_aspect_ratio=increase,crop={tw}:{th}",
+        "-vf", ",".join(filter_parts),
         "-c:v", "libsvtav1",
         #"-crf", "32", "-pix_fmt", "yuv420p10le",
         str(out),
@@ -205,11 +229,15 @@ def process_video(cfg: AppConfig, input_path: Path, content_id: str, workdir: Pa
     # ── Build video_formats (replaces master.m3u8) ─────────────────
     video_formats = manifest.generate(str(output_dir), profiles, actual, content_id)
 
-    _generate_thumbnail(input_path, output_dir, meta.width, meta.height)
-    _generate_preview(input_path, output_dir, meta.width, meta.height,
-                       cfg.preview_duration)
+    thumbnail_seek = min(5.0, max(0.0, meta.duration_s - 0.5)) if meta.duration_s > 0 else 5.0
+    _generate_thumbnail(input_path, output_dir, meta.display_width, meta.height,
+                        has_non_square=meta.has_non_square_pixels,
+                        seek_time=thumbnail_seek)
+    _generate_preview(input_path, output_dir, meta.display_width, meta.height,
+                       cfg.preview_duration,
+                       has_non_square=meta.has_non_square_pixels)
 
-    source_resolution = f"{meta.width}x{meta.height}"
+    source_resolution = f"{meta.display_width}x{meta.height}"
 
     free_preview_output_dir: Optional[Path] = None
     free_preview_video_formats: dict[str, str] = {}
