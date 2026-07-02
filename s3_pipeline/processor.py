@@ -113,7 +113,7 @@ def _generate_preview(input_path: Path, output_dir: Path,
         f"crop={tw}:{th}"
     )
     cmd = [
-        "ffmpeg", "-y", "-ss", "0", "-i", str(input_path),
+        "ffmpeg", "-y", "-i", str(input_path),
         "-t", str(duration), "-an",
         "-vf", ",".join(filter_parts),
         "-c:v", "libsvtav1",
@@ -150,7 +150,7 @@ def _generate_blurred_avif(input_path: Path, output_path: Path,
 def _trim_video(input_path: Path, output_path: Path, duration: int) -> Optional[Path]:
     log.info("processor", f"trimming first {duration}s to {output_path.name}")
     cmd = [
-        "ffmpeg", "-y", "-ss", "0", "-i", str(input_path),
+        "ffmpeg", "-y", "-i", str(input_path),
         "-t", str(duration),
         "-c", "copy",
         str(output_path),
